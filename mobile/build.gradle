@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 20
-    buildToolsVersion "20.0.0"
+    buildToolsVersion '20.0.0'
 
     defaultConfig {
         applicationId "com.tencent.weardemo"
@@ -22,5 +22,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     wearApp project(':wear')
-//    compile 'com.google.android.gms:play-services-wearable:+'
+    //    compile 'com.google.android.gms:play-services-wearable:+'
+    compile 'com.android.support:support-v4:+'
 }
