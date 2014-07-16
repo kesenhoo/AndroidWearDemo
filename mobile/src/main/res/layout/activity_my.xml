@@ -63,5 +63,11 @@
             android:layout_height="wrap_content"
             android:text="概括式通知"
             android:id="@+id/button8" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="语音输入"
+            android:id="@+id/button9" />
     </LinearLayout>
 </RelativeLayout>

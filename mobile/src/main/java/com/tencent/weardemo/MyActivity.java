@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.RemoteInput;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,6 +28,7 @@ public class MyActivity extends Activity {
     private Button addBtn;
     private Button groupBtn;
     private Button summaryBtn;
+    private Button voiceBtn;
     private NotificationManagerCompat mNotificationManager;
     String GROUP_KEY_SMS = "group_key_sms";
     String GROUP_KEY_SUM = "group_key_sum";
@@ -49,6 +51,7 @@ public class MyActivity extends Activity {
         addBtn = (Button)findViewById(R.id.button6);
         groupBtn = (Button)findViewById(R.id.button7);
         summaryBtn = (Button)findViewById(R.id.button8);
+        voiceBtn = (Button)findViewById(R.id.button9);
 
         normalBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,6 +101,12 @@ public class MyActivity extends Activity {
                 summaryBtnClick();
             }
         });
+        voiceBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                voiceBtnClick();
+            }
+        });
     }
 
     public void normalBtnClick(){
@@ -125,6 +134,13 @@ public class MyActivity extends Activity {
 
     public void mapBtnClick(){
         int notificationId = 2;
+
+        // Build intent for notification content
+        Intent viewIntent = new Intent(this, ViewEventActivity.class);
+        //viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
+        PendingIntent viewPendingIntent =
+                PendingIntent.getActivity(this, 0, viewIntent, 0);
+
         // Build an intent for an action to view a map
         Intent mapIntent = new Intent(Intent.ACTION_VIEW);
         Uri geoUri = Uri.parse("geo:39.940409,116.355257?q=西直门");
@@ -137,7 +153,7 @@ public class MyActivity extends Activity {
                         .setSmallIcon(R.drawable.wear_map)
                         .setContentTitle("地图Title")
                         .setContentText("地图Content")
-                        .setContentIntent(mapPendingIntent)
+                        .setContentIntent(viewPendingIntent)
                         .addAction(R.drawable.ic_map,
                                 getString(R.string.map), mapPendingIntent);
 
@@ -160,6 +176,13 @@ public class MyActivity extends Activity {
                         getString(R.string.label), actionPendingIntent)
                         .build();
 
+        // Build an intent for an action to view a map
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW);
+        Uri geoUri = Uri.parse("geo:39.940409,116.355257?q=西直门");
+        mapIntent.setData(geoUri);
+        PendingIntent mapPendingIntent =
+                PendingIntent.getActivity(this, 0, mapIntent, 0);
+
         // Build the notification and add the action via WearableExtender
         Notification notification =
                 new NotificationCompat.Builder(this)
@@ -168,6 +191,7 @@ public class MyActivity extends Activity {
                         .setContentText("短信Content\n今晚几点回家吃饭？")
                         .setContentIntent(actionPendingIntent)
                         .extend(new NotificationCompat.WearableExtender().addAction(action))
+                        .addAction(R.drawable.ic_map, getString(R.string.map), mapPendingIntent)
                         .build();
 
         NotificationManagerCompat notificationManager =
@@ -350,6 +374,43 @@ public class MyActivity extends Activity {
         NotificationManagerCompat notificationManager =
                 NotificationManagerCompat.from(this);
         notificationManager.notify(notificationId3, summaryNotification);
+    }
+
+    public void voiceBtnClick(){
+        int notificationId = 10;
+        // Key for the string that's delivered in the action's intent
+        String EXTRA_VOICE_REPLY = "extra_voice_reply";
+        String[] replyChoices = getResources().getStringArray(R.array.reply_choices);
+        RemoteInput remoteInput = new RemoteInput.Builder(EXTRA_VOICE_REPLY)
+                .setLabel("语音回复")
+                .setChoices(replyChoices)
+                .build();
+        // Create an intent for the reply action
+        Intent replyIntent = new Intent(this, ViewEventActivity.class);
+        PendingIntent replyPendingIntent =
+                PendingIntent.getActivity(this, 0, replyIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Create the reply action and add the remote input
+        NotificationCompat.Action action =
+                new NotificationCompat.Action.Builder(R.drawable.ic_reply,
+                        getString(R.string.label),replyPendingIntent)
+                        .addRemoteInput(remoteInput)
+                        .build();
+
+        // Build the notification and add the action via WearableExtender
+        Notification notification =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_message)
+                        .setContentTitle("标题")
+                        .setContentText("待回复内容")
+                        .extend(new NotificationCompat.WearableExtender().addAction(action))
+                        .build();
+
+        // Issue the notification
+        NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(this);
+        notificationManager.notify(notificationId, notification);
     }
 
     @Override
